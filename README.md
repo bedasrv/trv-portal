@@ -25,7 +25,8 @@ You authenticate on phone → MAC cloned to router → everyone online
 
 ## Requirements
 
-- OpenWrt/ImmortalWrt (aarch64, musl)
+- OpenWrt SNAPSHOT (aarch64_cortex-a53, mediatek/filogic, musl)
+- Kernel 6.12.74
 - travelmate ≥ 2.4.0
 - mwan3 (multi-WAN failover)
 - dnsmasq-full

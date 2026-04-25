@@ -59,8 +59,8 @@ jobs:
     strategy:
       matrix:
         sdk:
-          - name: qualcommax-ipq60xx
-            url: https://downloads.immortalwrt.org/releases/snapshot/targets/qualcommax/ipq60xx/immortalwrt-sdk-qualcommax-ipq60xx_gcc-13.3.0_musl.Linux-x86_64.tar.xz
+          - name: mediatek-filogic
+            url: https://downloads.openwrt.org/snapshots/targets/mediatek/filogic/openwrt-sdk-mediatek-filogic_gcc-14.3.0_musl.Linux-x86_64.tar.zst
     steps:
       - uses: actions/checkout@v4
 
@@ -81,12 +81,15 @@ jobs:
           ls -lh openwrt/trv-portal/files/usr/bin/
           file openwrt/trv-portal/files/usr/bin/trv-portal-detect || true
 
+      - name: Install zstd
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq zstd
+
       - name: Download OpenWrt SDK
         run: |
-          wget -q -O /tmp/sdk.tar.xz "${{ matrix.sdk.url }}"
+          wget -q -O /tmp/sdk.tar.zst "${{ matrix.sdk.url }}"
           mkdir -p /tmp/sdk
-          tar -xf /tmp/sdk.tar.xz -C /tmp/sdk
-          echo "SDK_DIR=$(ls -d /tmp/sdk/immortalwrt-sdk-*)" >> $GITHUB_ENV
+          tar --zstd -xf /tmp/sdk.tar.zst -C /tmp/sdk
+          echo "SDK_DIR=$(ls -d /tmp/sdk/openwrt-sdk-*)" >> $GITHUB_ENV
 
       - name: Install trv-portal package
         run: |
