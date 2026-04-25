@@ -2,4 +2,4 @@
 /Cargo.lock
 files/usr/bin/
 dist/
-*.ipk
+*.apk

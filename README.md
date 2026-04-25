@@ -62,8 +62,8 @@ Tag `v*` → GitHub Release with all binaries and IPKs.
 ## Installation
 
 ```bash
-# From IPK
-opkg install trv-portal_*.ipk luci-app-trv-portal_*.ipk
+# From APK
+apk add trv-portal*.apk luci-app-trv-portal*.apk
 
 # Or direct binary
 scp trv-portal-* root@192.168.1.1:/usr/bin/

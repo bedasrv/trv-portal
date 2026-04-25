@@ -106,17 +106,17 @@ jobs:
           make package/trv-portal/compile V=s -j$(nproc) || true
           make package/luci-app-trv-portal/compile V=s -j$(nproc) || true
 
-      - name: Collect IPKs
+      - name: Collect APKs
         run: |
           mkdir -p dist/
-          find "$SDK_DIR/bin" -name "trv-portal*.ipk" -o -name "luci-app-trv-portal*.ipk" | \
+          find "$SDK_DIR/bin" -name "trv-portal*.apk" -o -name "luci-app-trv-portal*.apk" | \
             while read f; do cp "$f" dist/; done
-          ls -lh dist/ || echo "No IPKs found"
+          ls -lh dist/ || echo "No APKs found"
 
-      - name: Upload IPKs
+      - name: Upload APKs
         uses: actions/upload-artifact@v4
         with:
-          name: trv-portal-ipks-${{ matrix.sdk.name }}
+          name: trv-portal-apks-${{ matrix.sdk.name }}
           path: dist/
 
   # ── Create GitHub Release (on tag) ─────────────────────────────
