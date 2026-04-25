@@ -51,10 +51,10 @@ jobs:
         with:
           name: trv-portal-binaries
           path: |
-            target/$TARGET/release/trv-portal-detect
-            target/$TARGET/release/trv-portal-mode
-            target/$TARGET/release/trv-portal-clone
-            target/$TARGET/release/trv-portal-cgi
+            target/${{ env.TARGET }}/release/trv-portal-detect
+            target/${{ env.TARGET }}/release/trv-portal-mode
+            target/${{ env.TARGET }}/release/trv-portal-clone
+            target/${{ env.TARGET }}/release/trv-portal-cgi
 
       - name: Upload staged files
         uses: actions/upload-artifact@v4
