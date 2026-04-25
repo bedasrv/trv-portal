@@ -36,7 +36,6 @@ jobs:
           aarch64-linux-gnu-strip target/$TARGET/release/trv-portal-mode
           aarch64-linux-gnu-strip target/$TARGET/release/trv-portal-clone
           aarch64-linux-gnu-strip target/$TARGET/release/trv-portal-cgi
-          aarch64-linux-gnu-strip target/$TARGET/release/trv-portal-core
 
       - name: Stage binaries for OpenWrt packaging
         run: |
@@ -45,7 +44,6 @@ jobs:
           cp target/$TARGET/release/trv-portal-mode files/usr/bin/
           cp target/$TARGET/release/trv-portal-clone files/usr/bin/
           cp target/$TARGET/release/trv-portal-cgi files/usr/bin/
-          cp target/$TARGET/release/trv-portal-core files/usr/bin/
           ls -lh files/usr/bin/
 
       - name: Upload Rust binaries
@@ -57,7 +55,6 @@ jobs:
             target/$TARGET/release/trv-portal-mode
             target/$TARGET/release/trv-portal-clone
             target/$TARGET/release/trv-portal-cgi
-            target/$TARGET/release/trv-portal-core
 
       - name: Upload staged files
         uses: actions/upload-artifact@v4

@@ -52,7 +52,10 @@ define Package/trv-portal/install
 	$(INSTALL_DIR) $(1)/usr/bin
 	# Binaries placed here by CI or manual build
 	if [ -f ./files/usr/bin/trv-portal-detect ]; then \
-		$(INSTALL_BIN) ./files/usr/bin/trv-portal-* $(1)/usr/bin/; \
+		$(INSTALL_BIN) ./files/usr/bin/trv-portal-detect $(1)/usr/bin/; \
+		$(INSTALL_BIN) ./files/usr/bin/trv-portal-mode $(1)/usr/bin/; \
+		$(INSTALL_BIN) ./files/usr/bin/trv-portal-clone $(1)/usr/bin/; \
+		$(INSTALL_BIN) ./files/usr/bin/trv-portal-cgi $(1)/usr/bin/; \
 	fi
 
 	$(INSTALL_DIR) $(1)/www/trv-portal
