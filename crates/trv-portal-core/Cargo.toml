@@ -1,0 +1,8 @@
+[package]
+name = "trv-portal-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+# Zero dependencies - pure stdlib. Runs on OpenWrt musl aarch64.

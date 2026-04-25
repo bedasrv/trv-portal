@@ -1,0 +1,13 @@
+[package]
+name = "trv-portal-detect"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "trv-portal-detect"
+path = "src/main.rs"
+
+[dependencies]
+trv-portal-core = { path = "../trv-portal-core" }
+ureq = { version = "2", default-features = false, features = ["tls"] }

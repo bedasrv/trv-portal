@@ -1,0 +1,15 @@
+[workspace]
+members = [
+    "crates/trv-portal-core",
+    "crates/trv-portal-detect",
+    "crates/trv-portal-mode",
+    "crates/trv-portal-clone",
+    "crates/trv-portal-cgi",
+]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+repository = "https://github.com/bedasrv/trv-portal"

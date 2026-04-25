@@ -1,0 +1,12 @@
+[package]
+name = "trv-portal-clone"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "trv-portal-clone"
+path = "src/main.rs"
+
+[dependencies]
+trv-portal-core = { path = "../trv-portal-core" }

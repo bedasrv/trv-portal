@@ -1,0 +1,15 @@
+#!/bin/sh
+# hotplug trigger: when wwan interface comes up, check if trv-portal needs to resume
+
+[ "$ACTION" = "ifup" ] || exit 0
+[ "$INTERFACE" = "wwan" ] || exit 0
+
+# If portal mode was active, restart the poll
+MODE=$(uci -q get trv-portal.@global[0].portal_mode)
+if [ "$MODE" = "portal" ]; then
+    logger -t trv-portal "wwan up — checking portal status"
+    if trv-portal-detect; then
+        logger -t trv-portal "internet OK after reconnect"
+        trv-portal-mode exit
+    fi
+fi

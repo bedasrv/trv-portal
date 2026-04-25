@@ -1,0 +1,16 @@
+# trv-portal UCI config template
+
+config trv-portal 'global'
+    option enabled '1'
+    option portal_mode 'normal'
+    option portal_domain ''
+    option portal_url ''
+    option auto_clone '1'
+    option clone_timeout '30'
+    option last_clone_mac ''
+    option portal_detect_urls 'http://detectportal.firefox.com/success.txt http://captive.apple.com/hotspot-detect.html http://www.gstatic.com/generate_204'
+
+config portal 'portal_mode_settings'
+    option gateway_title 'Hotel WiFi Authentication'
+    option gateway_message 'This network requires authentication. Tap below to open the hotel portal.'
+    option gateway_button 'Open Hotel Portal'

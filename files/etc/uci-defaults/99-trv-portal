@@ -1,0 +1,21 @@
+#!/bin/sh
+# First-install UCI defaults for trv-portal
+# Applied by OpenWrt on first boot (or after reset)
+
+uci -q batch <<'EOF'
+delete trv-portal.@global[0]
+add trv-portal global
+set trv-portal.@global[0].enabled='1'
+set trv-portal.@global[0].portal_mode='normal'
+set trv-portal.@global[0].portal_domain=''
+set trv-portal.@global[0].portal_url=''
+set trv-portal.@global[0].auto_clone='1'
+set trv-portal.@global[0].clone_timeout='30'
+set trv-portal.@global[0].last_clone_mac=''
+set trv-portal.@global[0].portal_detect_urls='http://detectportal.firefox.com/success.txt http://captive.apple.com/hotspot-detect.html http://www.gstatic.com/generate_204'
+add trv-portal portal
+set trv-portal.@portal[-1].gateway_title='Hotel WiFi Authentication'
+set trv-portal.@portal[-1].gateway_message='This network requires authentication. Tap below to open the hotel portal.'
+set trv-portal.@portal[-1].gateway_button='Open Hotel Portal'
+commit trv-portal
+EOF

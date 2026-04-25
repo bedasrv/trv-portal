@@ -1,0 +1,139 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+  TARGET: aarch64-unknown-linux-musl
+
+jobs:
+  # ── Build Rust binaries ──────────────────────────────────────────
+  rust-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install cross
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cross
+
+      - name: Build all crates
+        run: |
+          cross build --release --target $TARGET
+          ls -lh target/$TARGET/release/trv-portal-*
+
+      - name: Strip binaries
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq binutils-aarch64-linux-gnu
+          aarch64-linux-gnu-strip target/$TARGET/release/trv-portal-*
+
+      - name: Stage binaries for OpenWrt packaging
+        run: |
+          mkdir -p files/usr/bin
+          cp target/$TARGET/release/trv-portal-* files/usr/bin/
+          ls -lh files/usr/bin/
+
+      - name: Upload Rust binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: trv-portal-binaries
+          path: target/$TARGET/release/trv-portal-*
+
+      - name: Upload staged files
+        uses: actions/upload-artifact@v4
+        with:
+          name: trv-portal-files
+          path: files/
+
+  # ── Build OpenWrt IPKs ─────────────────────────────────────────
+  openwrt-build:
+    needs: rust-build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        sdk:
+          - name: qualcommax-ipq60xx
+            url: https://downloads.immortalwrt.org/releases/snapshot/targets/qualcommax/ipq60xx/immortalwrt-sdk-qualcommax-ipq60xx_gcc-13.3.0_musl.Linux-x86_64.tar.xz
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download staged files
+        uses: actions/download-artifact@v4
+        with:
+          name: trv-portal-files
+          path: openwrt/trv-portal/
+
+      - name: Download Rust binaries
+        uses: actions/download-artifact@v4
+        with:
+          name: trv-portal-binaries
+          path: openwrt/trv-portal/files/usr/bin/
+
+      - name: Verify binaries
+        run: |
+          ls -lh openwrt/trv-portal/files/usr/bin/
+          file openwrt/trv-portal/files/usr/bin/trv-portal-detect || true
+
+      - name: Download OpenWrt SDK
+        run: |
+          wget -q -O /tmp/sdk.tar.xz "${{ matrix.sdk.url }}"
+          mkdir -p /tmp/sdk
+          tar -xf /tmp/sdk.tar.xz -C /tmp/sdk
+          echo "SDK_DIR=$(ls -d /tmp/sdk/immortalwrt-sdk-*)" >> $GITHUB_ENV
+
+      - name: Install trv-portal package
+        run: |
+          cp -r openwrt/trv-portal "$SDK_DIR/package/"
+          cp -r openwrt/luci-app-trv-portal "$SDK_DIR/package/"
+
+      - name: Update feeds
+        run: |
+          cd "$SDK_DIR"
+          ./scripts/feeds update -a
+          ./scripts/feeds install -a
+          make defconfig
+
+      - name: Build trv-portal
+        run: |
+          cd "$SDK_DIR"
+          make package/trv-portal/compile V=s -j$(nproc) || true
+          make package/luci-app-trv-portal/compile V=s -j$(nproc) || true
+
+      - name: Collect IPKs
+        run: |
+          mkdir -p dist/
+          find "$SDK_DIR/bin" -name "trv-portal*.ipk" -o -name "luci-app-trv-portal*.ipk" | \
+            while read f; do cp "$f" dist/; done
+          ls -lh dist/ || echo "No IPKs found"
+
+      - name: Upload IPKs
+        uses: actions/upload-artifact@v4
+        with:
+          name: trv-portal-ipks-${{ matrix.sdk.name }}
+          path: dist/
+
+  # ── Create GitHub Release (on tag) ─────────────────────────────
+  release:
+    needs: [rust-build, openwrt-build]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: trv-portal-*
+          path: dist/
+          merge-multiple: true
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/**/*
+          generate_release_notes: true
+          prerelease: ${{ contains(github.ref, '-rc') || contains(github.ref, '-beta') }}

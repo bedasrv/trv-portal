@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hotel WiFi Authentication</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #1a1a2e; color: #e0e0e0;
+  display: flex; justify-content: center; align-items: center;
+  min-height: 100vh; margin: 0;
+}
+.card {
+  background: #16213e; border-radius: 12px; padding: 2rem;
+  max-width: 420px; width: 90%; text-align: center;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+}
+h1 { font-size: 1.4rem; margin-bottom: 0.3rem; color: #e94560; }
+.subtitle { font-size: 0.85rem; opacity: 0.6; margin-bottom: 1.5rem; }
+p { margin: 0.75rem 0; font-size: 0.95rem; opacity: 0.9; }
+.btn {
+  display: inline-block; background: #e94560; color: #fff; border: none;
+  padding: 0.8rem 2rem; border-radius: 8px; font-size: 1.1rem;
+  cursor: pointer; text-decoration: none; margin: 0.8rem 0;
+  font-weight: 600; transition: background 0.2s;
+}
+.btn:hover { background: #c23152; }
+.btn:active { background: #a1253f; }
+.status { font-size: 0.85rem; opacity: 0.7; margin-top: 1.2rem; }
+.status.connected { color: #4ade80; opacity: 1; }
+.clone-section { margin-top: 1.5rem; padding-top: 1rem;
+                 border-top: 1px solid rgba(255,255,255,0.1); }
+.clone-btn {
+  display: block; width: 100%; background: transparent;
+  color: #e94560; border: 1px solid #e94560; padding: 0.6rem;
+  border-radius: 8px; font-size: 0.9rem; cursor: pointer;
+  margin-top: 0.5rem; transition: background 0.2s;
+}
+.clone-btn:hover { background: rgba(233,69,96,0.1); }
+.clone-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.admin-link {
+  display: block; margin-top: 1.5rem; font-size: 0.8rem;
+  color: #e94560; text-decoration: none; opacity: 0.8;
+}
+.admin-link:hover { opacity: 1; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>&#x1F510; Hotel WiFi</h1>
+  <div class="subtitle">TRV-Portal</div>
+  <p>This network requires authentication before use.</p>
+  <a class="btn" href="/cgi-bin/trv-portal/portal">Open Hotel Portal</a>
+  <p class="status" id="status">Waiting for you to authenticate...</p>
+  <div class="clone-section">
+    <p style="font-size: 0.8rem; opacity: 0.6;">After authenticating:</p>
+    <button class="clone-btn" id="clone-btn" disabled>
+      Use My Device's MAC Address
+    </button>
+  </div>
+  <a class="admin-link" href="/cgi-bin/luci">Router Admin &rarr;</a>
+</div>
+<script>
+var statusEl = document.getElementById('status');
+var cloneBtn = document.getElementById('clone-btn');
+
+function pollStatus() {
+  fetch('/cgi-bin/trv-portal/status')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.mode === 'normal') {
+        statusEl.textContent = '\u2713 Connected! All devices now have internet.';
+        statusEl.className = 'status connected';
+        cloneBtn.disabled = false;
+      } else if (data.mode === 'portal') {
+        statusEl.textContent = 'Waiting for authentication...';
+        cloneBtn.disabled = true;
+      }
+    })
+    .catch(function() {
+      // CGI not available yet
+    });
+}
+
+cloneBtn.addEventListener('click', function() {
+  cloneBtn.textContent = 'Cloning...';
+  cloneBtn.disabled = true;
+  fetch('/cgi-bin/trv-portal/clone?ip=' + encodeURIComponent(window.location.hostname || '192.168.1.1'))
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.status === 'ok') {
+        cloneBtn.textContent = '\u2713 MAC Cloned: ' + data.mac;
+      } else {
+        cloneBtn.textContent = 'Failed: ' + data.message;
+        cloneBtn.disabled = false;
+        cloneBtn.style.borderColor = '#ef4444';
+        cloneBtn.style.color = '#ef4444';
+      }
+    })
+    .catch(function() {
+      cloneBtn.textContent = 'Use My Device\'s MAC Address';
+      cloneBtn.disabled = false;
+    });
+});
+
+pollStatus();
+setInterval(pollStatus, 2000);
+</script>
+</body>
+</html>
