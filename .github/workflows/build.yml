@@ -109,6 +109,8 @@ jobs:
       - name: Update feeds
         run: |
           cd "$SDK_DIR"
+          # Ensure luci feed is present (needed for luci-app-trv-portal deps)
+          grep -q 'src-git luci' feeds.conf.default || echo 'src-git luci https://git.openwrt.org/project/luci.git;openwrt-24.10' >> feeds.conf.default
           ./scripts/feeds update -a
           ./scripts/feeds install -a
           make defconfig
@@ -116,8 +118,8 @@ jobs:
       - name: Build trv-portal
         run: |
           cd "$SDK_DIR"
-          make package/trv-portal/compile V=s -j$(nproc) || true
-          make package/luci-app-trv-portal/compile V=s -j$(nproc) || true
+          make package/trv-portal/compile V=s -j$(nproc)
+          make package/luci-app-trv-portal/compile V=s -j$(nproc)
 
       - name: Collect APKs
         run: |
