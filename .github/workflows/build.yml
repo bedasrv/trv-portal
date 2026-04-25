@@ -32,19 +32,32 @@ jobs:
       - name: Strip binaries
         run: |
           sudo apt-get update -qq && sudo apt-get install -y -qq binutils-aarch64-linux-gnu
-          aarch64-linux-gnu-strip target/$TARGET/release/trv-portal-*
+          aarch64-linux-gnu-strip target/$TARGET/release/trv-portal-detect
+          aarch64-linux-gnu-strip target/$TARGET/release/trv-portal-mode
+          aarch64-linux-gnu-strip target/$TARGET/release/trv-portal-clone
+          aarch64-linux-gnu-strip target/$TARGET/release/trv-portal-cgi
+          aarch64-linux-gnu-strip target/$TARGET/release/trv-portal-core
 
       - name: Stage binaries for OpenWrt packaging
         run: |
           mkdir -p files/usr/bin
-          cp target/$TARGET/release/trv-portal-* files/usr/bin/
+          cp target/$TARGET/release/trv-portal-detect files/usr/bin/
+          cp target/$TARGET/release/trv-portal-mode files/usr/bin/
+          cp target/$TARGET/release/trv-portal-clone files/usr/bin/
+          cp target/$TARGET/release/trv-portal-cgi files/usr/bin/
+          cp target/$TARGET/release/trv-portal-core files/usr/bin/
           ls -lh files/usr/bin/
 
       - name: Upload Rust binaries
         uses: actions/upload-artifact@v4
         with:
           name: trv-portal-binaries
-          path: target/$TARGET/release/trv-portal-*
+          path: |
+            target/$TARGET/release/trv-portal-detect
+            target/$TARGET/release/trv-portal-mode
+            target/$TARGET/release/trv-portal-clone
+            target/$TARGET/release/trv-portal-cgi
+            target/$TARGET/release/trv-portal-core
 
       - name: Upload staged files
         uses: actions/upload-artifact@v4
