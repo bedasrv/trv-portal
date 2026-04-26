@@ -64,7 +64,6 @@ define Package/trv-portal/install
 	$(INSTALL_DIR) $(1)/www/cgi-bin
 	$(INSTALL_BIN) ./files/www/cgi-bin/portal-handler $(1)/www/cgi-bin/
 
-	$(INSTALL_DIR) $(1)/var/run/trv-portal
 endef
 
 $(eval $(call BuildPackage,trv-portal))
