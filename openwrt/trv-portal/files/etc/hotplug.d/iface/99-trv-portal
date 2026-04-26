@@ -1,0 +1,10 @@
+#!/bin/sh
+# TRV-Portal hotplug handler — fires on WAN interface changes
+# Triggers portal detection on new uplinks
+
+[ "$ACTION" = "ifup" ] || exit 0
+[ "$INTERFACE" = "wwan" ] || [ "$INTERFACE" = "wan" ] || exit 0
+
+# Let travelmate handle the detection
+# This is a supplementary hook for manual connections
+/usr/bin/trv-portal-detect &
