@@ -13,7 +13,7 @@ define Package/trv-portal
     SECTION:=net
     CATEGORY:=Network
     TITLE:=Captive Portal Passthrough for Travel Routers
-    DEPENDS:=+iptables +conntrack +dnsmasq-full +travelmate +mwan3
+    DEPENDS:=+libc
     URL:=https://github.com/bedasrv/trv-portal
 endef
 

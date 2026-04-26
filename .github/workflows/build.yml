@@ -112,7 +112,7 @@ jobs:
           # Ensure luci feed is present (needed for luci-app-trv-portal deps)
           grep -q 'src-git luci' feeds.conf.default || echo 'src-git luci https://git.openwrt.org/project/luci.git;openwrt-24.10' >> feeds.conf.default
           ./scripts/feeds update -a
-          ./scripts/feeds install -a
+          ./scripts/feeds install trv-portal luci-app-trv-portal
           make defconfig
 
       - name: Build trv-portal
