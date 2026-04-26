@@ -1,20 +1,27 @@
 #!/bin/sh
-# TRV-Portal UCI defaults — applied on first install
+# TRV-Portal UCI defaults — applied on first install and upgrades
 
-uci -q get trv-portal.@global[0] > /dev/null && exit 0
+# Only create trv-portal config on fresh install
+if ! uci -q get trv-portal.@global[0] > /dev/null 2>&1; then
+	uci -q batch <<-UCIEOF
+		add trv-portal global
+		set trv-portal.@global[0].enabled='1'
+		set trv-portal.@global[0].portal_mode='normal'
+		set trv-portal.@global[0].portal_detect_urls='http://detectportal.firefox.com/success.txt http://captive.apple.com/hotspot-detect.html http://www.gstatic.com/generate_204'
+		set trv-portal.@global[0].auto_clone='1'
+		set trv-portal.@global[0].clone_timeout='30'
+		add trv-portal portal_mode_settings
+		set trv-portal.@portal_mode_settings[0].gateway_title='Hotel WiFi Authentication'
+		set trv-portal.@portal_mode_settings[0].gateway_message='This network requires authentication. Tap below to open the hotel portal.'
+		set trv-portal.@portal_mode_settings[0].gateway_button='Open Hotel Portal'
+		commit trv-portal
+	UCIEOF
+fi
 
-uci -q batch <<-EOF
-	add trv-portal global
-	set trv-portal.@global[0].enabled='1'
-	set trv-portal.@global[0].portal_mode='normal'
-	set trv-portal.@global[0].portal_detect_urls='http://detectportal.firefox.com/success.txt http://captive.apple.com/hotspot-detect.html http://www.gstatic.com/generate_204'
-	set trv-portal.@global[0].auto_clone='1'
-	set trv-portal.@global[0].clone_timeout='30'
-	add trv-portal portal_mode_settings
-	set trv-portal.@portal_mode_settings[0].gateway_title='Hotel WiFi Authentication'
-	set trv-portal.@portal_mode_settings[0].gateway_message='This network requires authentication. Tap below to open the hotel portal.'
-	set trv-portal.@portal_mode_settings[0].gateway_button='Open Hotel Portal'
-	commit trv-portal
-EOF
+# Always ensure uhttpd captive portal handler is configured
+if ! uci -q get uhttpd.main.error_page > /dev/null 2>&1; then
+	uci set uhttpd.main.error_page="/cgi-bin/portal-handler"
+	uci commit uhttpd
+fi
 
 mkdir -p /var/run/trv-portal

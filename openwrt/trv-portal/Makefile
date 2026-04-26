@@ -61,6 +61,9 @@ define Package/trv-portal/install
 	$(INSTALL_DIR) $(1)/www/trv-portal
 	$(INSTALL_DATA) ./files/www/trv-portal/* $(1)/www/trv-portal/
 
+	$(INSTALL_DIR) $(1)/www/cgi-bin
+	$(INSTALL_BIN) ./files/www/cgi-bin/portal-handler $(1)/www/cgi-bin/
+
 	$(INSTALL_DIR) $(1)/var/run/trv-portal
 endef
 

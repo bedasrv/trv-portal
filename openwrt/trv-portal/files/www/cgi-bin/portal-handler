@@ -1,0 +1,30 @@
+#!/bin/sh
+MODE=$(uci -q get trv-portal.@global[0].portal_mode 2>/dev/null)
+REQUEST_URI="${REQUEST_URI:-/}"
+
+if [ "$MODE" = "portal" ]; then
+    case "$REQUEST_URI" in
+        */portal_gateway|*/portal_gateway*)
+            DOMAIN=$(uci -q get trv-portal.@global[0].portal_domain 2>/dev/null)
+            printf "Status: 307 Temporary Redirect\r\n"
+            printf "Location: https://%s/\r\n" "$DOMAIN"
+            printf "\r\n"
+            ;;
+        */trv-portal/status.json*)
+            CONNECTED=0
+            curl -s --max-time 3 http://detectportal.firefox.com/success.txt >/dev/null 2>&1 && CONNECTED=1
+            DOMAIN=$(uci -q get trv-portal.@global[0].portal_domain 2>/dev/null)
+            printf "Status: 200 OK\r\nContent-Type: application/json\r\n\r\n"
+            printf "{\"connected\":%d,\"mode\":\"portal\",\"domain\":\"%s\"}\n" $CONNECTED "$DOMAIN"
+            ;;
+        */cgi-bin/luci*|*/luci/*|*/.well-known/*)
+            printf "Status: 404 Not Found\r\n\r\n"
+            ;;
+        *)
+            printf "Status: 200 OK\r\nContent-Type: text/html; charset=utf-8\r\n\r\n"
+            cat /www/trv-portal/gateway.html
+            ;;
+    esac
+else
+    printf "Status: 404 Not Found\r\n\r\n"
+fi
